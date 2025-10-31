@@ -51,6 +51,7 @@ def dias_entre_fechas(fecha1: datetime, fecha2: datetime) -> int:
         return dias
 def maximo_dias_sin_ganar(carreras: list[CarreraFP], nombre_piloto: str) -> int|None:
         fechas_ganadas= []
+        lista_dias= []  
         
         for carrera in carreras:
             if carrera.podio[0].nombre== nombre_piloto:
@@ -61,8 +62,9 @@ def maximo_dias_sin_ganar(carreras: list[CarreraFP], nombre_piloto: str) -> int|
         
         for r in range(len(fechas_ganadas)-1):
                 dias = dias_entre_fechas(fechas_ganadas[r], fechas_ganadas[r+1])
+                lista_dias.append(dias)
         
-        return max(dias)
+        return max(lista_dias)
 
                 
         
