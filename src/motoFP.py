@@ -47,7 +47,7 @@ carreras ganadas por el piloto. Si el piloto no ha ganado al menos dos carreras,
 la función debe devolver `None`.
 """
 def dias_entre_fechas(fecha1: datetime, fecha2: datetime) -> int:
-        dias= (fecha2()  - fecha1()).days
+        dias= (fecha2() - fecha1()).days()
         return dias
 def maximo_dias_sin_ganar(carreras: list[CarreraFP], nombre_piloto: str) -> int|None:
         fechas_ganadas= []
