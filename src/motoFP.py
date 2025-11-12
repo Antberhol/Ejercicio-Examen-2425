@@ -2,6 +2,7 @@ from typing import NamedTuple
 from datetime import datetime
 import csv
 from typing import List 
+from collections import defaultdict
 
 Piloto=NamedTuple("Piloto", [("nombre", str),("escuderia", str)])
 
@@ -35,7 +36,6 @@ def lee_carreras(ruta_archivo: str) -> List[CarreraFP]:
                 podios=[Piloto(piloto1, escuderia1), Piloto(piloto2, escuderia2), Piloto(piloto3, escuderia3)]      
                 carrera = CarreraFP(fecha_hora, circuito, pais, seco, tiempo, podios)
                 lista_carreras.append(carrera)
-                print(carrera)
                         
         return lista_carreras
 """
@@ -47,7 +47,7 @@ carreras ganadas por el piloto. Si el piloto no ha ganado al menos dos carreras,
 la función debe devolver `None`.
 """
 def dias_entre_fechas(fecha1: datetime, fecha2: datetime) -> int:
-        dias= (fecha2() - fecha1()).days()
+        dias= (fecha2 - fecha1).days
         return dias
 def maximo_dias_sin_ganar(carreras: list[CarreraFP], nombre_piloto: str) -> int|None:
         fechas_ganadas= []
@@ -66,11 +66,84 @@ def maximo_dias_sin_ganar(carreras: list[CarreraFP], nombre_piloto: str) -> int|
         
         return max(lista_dias)
 
-                
-        
+"""
+Devuelve un diccionario que a cada circuito le hace corresponder el nombre del piloto que
+    más veces ha estado en el podio en ese circuito.
+
+    """
+
+def piloto_mas_podios_por_circuito(carreras: list[CarreraFP]) -> dict[str, str]:
+    podios_por_circuito = {}
+
+    for carrera in carreras:
+        circuito = carrera.circuito
+
+        if circuito not in podios_por_circuito:
+            podios_por_circuito[circuito] = {}
+
+        for piloto in carrera.podio:
+            nombre = piloto.nombre
+            if nombre not in podios_por_circuito[circuito]:
+                podios_por_circuito[circuito][nombre] = 0
+            podios_por_circuito[circuito][nombre] += 1
+
+    resultado = {}
+    for circuito, contador_podios in podios_por_circuito.items():
+        piloto_top = max(contador_podios.items(), key=lambda x:x[1])[0]
+        resultado[circuito] = piloto_top
+
+    return resultado
+
+    """
+    
+    Devuelve una lista con las escuderías que solo tienen un piloto.
+    """
+    
+def escuderias_con_solo_un_piloto(carreras: list[CarreraFP]) -> list[str]:
+    escuderias = defaultdict(set)
+    resultado = []
+    for carrera in carreras:
+        for piloto in carrera.podio:
+            escuderia = piloto.escuderia.strip()
+            nombre_piloto = piloto.nombre.strip()
+            escuderias[escuderia].add(nombre_piloto)   
+    
+    for escuderia, pilotos in escuderias.items():
+        if len(pilotos)==1:
+            resultado.append(escuderia)
+    return resultado
 
 
-                
-                
-                
-        
+def piloto_racha_mas_larga_victorias_consecutivas(carreras: list[CarreraFP], año: int|None = None) -> tuple[str, int]:
+    resultado = defaultdict(list)
+    racha_max = 0
+    piloto_top = ""
+    
+    carreras_ordenadas = sorted(carreras, key=lambda x: x.fecha_hora)
+    
+    for carrera in carreras_ordenadas:
+        if año is None or carrera.fecha_hora.year == año:
+            if carrera.podio:  # aseguramos que hay podio
+                ganador = carrera.podio[0].nombre
+                for piloto in carrera.podio:
+                    nombre = piloto.nombre
+                    resultado[nombre].append(nombre == ganador)  # True si ganó, False si no
+
+    for piloto in resultado:
+        resultados = resultado[piloto]
+        racha_actual = 0
+        racha_max_piloto = 0
+        for r in resultados:
+            if r==True:
+                racha_actual += 1
+                if racha_actual > racha_max_piloto:
+                    racha_max_piloto = racha_actual
+            else:
+                racha_actual = 0
+
+        if racha_max_piloto > racha_max:
+            racha_max = racha_max_piloto
+            piloto_top = piloto
+            
+    return (piloto_top, racha_max)              
+            
